@@ -1,3 +1,5 @@
+# These variables must be placed in some secret key
+# With that we can create a volume in the container and put these keys there
 host: postgres
 port: 5432
 username: postgres

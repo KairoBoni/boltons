@@ -11,6 +11,7 @@ type Server struct {
 	handlers *Handler
 }
 
+//NewServer create a new server of the REST-API
 func NewServer(dbConfigFilepath string) (*Server, error) {
 	store, err := database.NewStore(dbConfigFilepath)
 	if err != nil {
@@ -35,6 +36,7 @@ func (s *Server) setupRoutes() {
 	s.route.GET("/nfe/amount/:accessKey", s.handlers.getNfeAmount)
 }
 
+//Run starts the server
 func (s *Server) Run() error {
 	return s.route.Start(":8080")
 }

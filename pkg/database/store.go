@@ -1,6 +1,7 @@
 package database
 
 import (
+	"database/sql"
 	"io/ioutil"
 
 	"github.com/jmoiron/sqlx"
@@ -66,6 +67,9 @@ func (s *Store) GetNfeAmount(accessKey string) (string, error) {
 
 	row := s.db.QueryRow(getNFEAmount, accessKey)
 	if err := row.Scan(&amount); err != nil {
+		if err == sql.ErrNoRows {
+			return "", nil
+		}
 		return "", err
 	}
 

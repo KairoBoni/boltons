@@ -22,7 +22,7 @@ func main() {
 		messageChan         = make(chan kafka.WorkerMessage)
 		errChan             = make(chan error)
 		doneChan            = make(chan bool)
-		numWorkes           = 3
+		goRoutines          = 3
 	)
 	defer close(messageChan)
 	defer close(errChan)
@@ -43,8 +43,8 @@ func main() {
 	p := kafka.NewPublisherOnTopic(kafkaBrokerURLs, kafkaClientID, kafkaTopic)
 	defer p.Close()
 
-	for i := 0; i < numWorkes; i++ {
-		go messageSender(messageChan, p, errChan)
+	for i := 0; i < goRoutines; i++ {
+		go publishMessage(messageChan, p, errChan)
 	}
 
 	go func() {
@@ -75,7 +75,7 @@ func main() {
 	}
 }
 
-func messageSender(messageChan chan kafka.WorkerMessage, p kafka.PublisherInterface, errChan chan error) {
+func publishMessage(messageChan chan kafka.WorkerMessage, p kafka.PublisherInterface, errChan chan error) {
 	for {
 		m, ok := (<-messageChan)
 		if !ok {

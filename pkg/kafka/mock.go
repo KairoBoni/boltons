@@ -2,10 +2,14 @@ package kafka
 
 import "context"
 
+//PublishMock use for test to another packages
+//this struct implements the PublisherInterface
 type PublishMock struct {
 	Err error
 }
 
+//SubscriberMock use for test to another packages
+//this struct implements the SubscriberInterface
 type SubscriberMock struct {
 	Message []byte
 	Err     error

@@ -239,7 +239,7 @@ func TestMessageSender(t *testing.T) {
 		messageChan := make(chan kafka.WorkerMessage)
 		errChan := make(chan error)
 
-		go messageSender(messageChan, &test.publisher, errChan)
+		go publishMessage(messageChan, &test.publisher, errChan)
 
 		messageChan <- test.message
 		if test.expectedErr == nil {

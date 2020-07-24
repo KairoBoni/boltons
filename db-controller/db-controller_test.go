@@ -24,7 +24,7 @@ var (
 	`)
 )
 
-func TestMessageSender(t *testing.T) {
+func TestReadMessage(t *testing.T) {
 
 	tests := []struct {
 		subscriber  kafka.SubscriberMock
@@ -62,7 +62,7 @@ func TestMessageSender(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		accessKey, amount, err := reciveMessage(&test.subscriber)
+		accessKey, amount, err := readMessage(&test.subscriber)
 
 		assert.Equal(t, test.accessKey, accessKey)
 		assert.Equal(t, test.amount, amount)

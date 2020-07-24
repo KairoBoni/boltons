@@ -38,19 +38,19 @@ func TestGetNfeAmount(t *testing.T) {
 				Amount: "",
 				Err:    fmt.Errorf("Failed to get data from db"),
 			},
-			body:   "\"No nfe found from the access key blaa\"\n",
+			body:   "\"Failed to get data from db\"\n",
 			status: http.StatusInternalServerError,
 		},
 	}
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	c.SetPath("/nfe/amount/:accessKey")
-	c.SetParamNames("accessKey")
-	c.SetParamValues("blaa")
-
 	for _, test := range tests {
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.SetPath("/nfe/amount/:accessKey")
+		c.SetParamNames("accessKey")
+		c.SetParamValues("blaa")
+
 		h := &Handler{
 			db: test.db,
 		}

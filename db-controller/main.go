@@ -20,6 +20,10 @@ func main() {
 		kafkaTopic       = os.Getenv("KAFKA_TOPIC")
 	)
 
+	if kafkaBrokerURLs == "" || kafkaTopic == "" || kafkaClientID == "" || dbConfigFilepath == "" {
+		log.Fatal().Msgf("Missing some environment variable (CONFIG_DB_FILEPATH|KAFKA_BROKERS|KAFKA_CLIENT_ID|KAFKA_TOPIC)")
+	}
+
 	//Wait for a while until the Kafka and Postgres start
 	time.Sleep(time.Second * 30)
 
@@ -32,7 +36,7 @@ func main() {
 	}
 
 	for {
-		accessKey, amount, err := reciveMessage(s)
+		accessKey, amount, err := readMessage(s)
 		if err != nil {
 			log.Error().Msgf("error while receiving message: %s", err.Error())
 		}
@@ -43,7 +47,7 @@ func main() {
 	}
 }
 
-func reciveMessage(s kafka.SubscriberInterface) (string, string, error) {
+func readMessage(s kafka.SubscriberInterface) (string, string, error) {
 	var NFE = &kafka.DBMessage{}
 
 	m, err := s.Read()
