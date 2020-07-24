@@ -2,7 +2,6 @@ package kafka
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"time"
 
@@ -15,7 +14,6 @@ type Publisher struct {
 
 func NewPublisherOnTopic(kafkaBrokerUrls, clientId, topic string) *Publisher {
 	brokers := strings.Split(kafkaBrokerUrls, ",")
-	fmt.Println(brokers)
 	dialer := &kafka.Dialer{
 		Timeout:  30 * time.Second,
 		ClientID: clientId,

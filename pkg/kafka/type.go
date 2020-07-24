@@ -19,5 +19,5 @@ type WorkerMessage struct {
 
 type DBMessage struct {
 	AccessKey string `json:"access_key"`
-	Total     string `json:"total"`
+	Amount    string `json:"amount"`
 }

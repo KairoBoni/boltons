@@ -1,9 +1,9 @@
 package database
 
 const (
-	insertNFETotal = `INSERT INTO nfe_total(access_key, total)
-	VALUES ($1, $2)`
+	insertNFEAmount = `INSERT INTO nfe_amount(access_key, amount)
+	VALUES ($1, $2);`
 
-	getNFETotal = `SELECT total FROM nfe_total
-	WHERE access_key=$1`
+	getNFEAmount = `SELECT amount FROM nfe_amount
+	WHERE access_key=$1;`
 )

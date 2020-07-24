@@ -97,6 +97,7 @@ services:
     logging:
       driver: none
 
+
   # This "container" is a workaround to pre-create topics
   kafka-setup:
     image: confluentinc/cp-kafka:5.0.0
@@ -117,8 +118,10 @@ services:
       # We override the image's `command` anyways, hence this container will not start a broker.
       KAFKA_BROKER_ID: ignored
       KAFKA_ZOOKEEPER_CONNECT: ignored
-    # logging:
-    #   driver: none
+    logging:
+      driver: none
+
+
   postgres:
     image: postgres
     environment:
@@ -133,6 +136,7 @@ services:
     logging:
       driver: none
       
+
   pgadmin:
     image: dpage/pgadmin4
     environment:
@@ -148,6 +152,7 @@ services:
     logging:
       driver: none
   
+
   rest-api:
     build:
       context: .
@@ -164,6 +169,7 @@ services:
     networks:
       - postgres-network
   
+
   db-controller:
     build:
       context: .
@@ -179,6 +185,7 @@ services:
     networks:
       - postgres-network
 
+
   arquivei-api:
     build:
       context: .
@@ -191,6 +198,7 @@ services:
       KAFKA_BROKERS: '${MY_IP}:19092,${MY_IP}:29092,${MY_IP}:39092'
       KAFKA_CLIENT_ID: 'my-client'
       KAFKA_TOPIC: 'worker'
+
 
   worker1:
     build:
@@ -205,6 +213,7 @@ services:
       KAFKA_PUBLISHER_TOPIC: 'db'
       KAFKA_SUBSCRIBE_TOPIC: 'worker'
 
+
   worker2:
     build:
       context: .
@@ -217,6 +226,7 @@ services:
       KAFKA_CLIENT_ID: 'my-client'
       KAFKA_PUBLISHER_TOPIC: 'db'
       KAFKA_SUBSCRIBE_TOPIC: 'worker'
+
 
 networks: 
   postgres-network:

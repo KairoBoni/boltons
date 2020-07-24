@@ -75,9 +75,9 @@ func (cli *ArquiveiClient) RequestNFEs() ([]kafka.WorkerMessage, error) {
 	)
 
 	if cli.page.Next == "" {
-		body, err = cli.makeRequest("GET", fmt.Sprintf("%s/v1/nfe/received", cli.endpoint), []byte(""))
+		body, err = cli.makeRequest(http.MethodGet, fmt.Sprintf("%s/v1/nfe/received", cli.endpoint), []byte(""))
 	} else {
-		body, err = cli.makeRequest("GET", cli.page.Next, []byte(""))
+		body, err = cli.makeRequest(http.MethodGet, cli.page.Next, []byte(""))
 	}
 	if err != nil {
 		return nil, err
@@ -177,5 +177,5 @@ func (cli *ArquiveiClient) makeRequest(method, url string, body []byte) ([]byte,
 }
 
 func shouldRetry(resp *http.Response) bool {
-	return resp == nil || (resp.StatusCode != 204 && resp.StatusCode != 200)
+	return resp == nil || (resp.StatusCode != http.StatusNoContent && resp.StatusCode != http.StatusOK)
 }

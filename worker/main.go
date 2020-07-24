@@ -60,10 +60,10 @@ func main() {
 
 var r = regexp.MustCompile("(nfeProc)")
 
-func processNFE(data []byte) (*TotalNFE, error) {
+func processNFE(data []byte) (*kafka.DBMessage, error) {
 	var (
-		total string
-		m     = &Message{}
+		amount string
+		m      = &Message{}
 	)
 
 	err := json.Unmarshal(data, m)
@@ -82,18 +82,18 @@ func processNFE(data []byte) (*TotalNFE, error) {
 		if err != nil {
 			return nil, err
 		}
-		total = nfe.Total
+		amount = nfe.Amount
 	} else {
 		nfe := &NFE{}
 		err = xml.Unmarshal(dataNFE, nfe)
 		if err != nil {
 			return nil, err
 		}
-		total = nfe.Total
+		amount = nfe.Amount
 	}
 
-	return &TotalNFE{
+	return &kafka.DBMessage{
 		AccessKey: m.AccessKey,
-		Total:     total,
+		Amount:    amount,
 	}, nil
 }

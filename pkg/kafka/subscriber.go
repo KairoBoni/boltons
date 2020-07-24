@@ -2,7 +2,6 @@ package kafka
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"time"
 
@@ -15,9 +14,7 @@ type Subscriber struct {
 
 func NewTopicSubscription(kafkaBrokerUrls, kafkaClientId, kafkaTopic string) *Subscriber {
 	brokers := strings.Split(kafkaBrokerUrls, ",")
-	fmt.Println(brokers)
 
-	// make a new reader that consumes from topic-A
 	config := kafka.ReaderConfig{
 		Brokers:         brokers,
 		GroupID:         kafkaClientId,

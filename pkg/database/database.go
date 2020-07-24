@@ -23,17 +23,20 @@ type Config struct {
 func genSchema() string {
 	dbTimezone := `SET TIMEZONE TO 'America/Sao_Paulo';`
 
-	nfeTotalTable := `
-		CREATE TABLE IF NOT EXISTS nfe_total (
+	nfeAmountTable := `
+		CREATE TABLE IF NOT EXISTS nfe_amount (
 		access_key TEXT PRIMARY KEY,
-		total TEXT NOT NULL
+		amount TEXT NOT NULL
 	);`
 
+	// We only do this action for demonstration purposes
+	// if you do not delete what is in the database
+	// when it runs again we will have problems with duplicate primary keys
 	deletePersistentData := `
-		DELETE FROM nfe_total;
+		DELETE FROM nfe_amount;
 	`
 
-	return dbTimezone + nfeTotalTable + deletePersistentData
+	return dbTimezone + nfeAmountTable + deletePersistentData
 }
 
 func buildConnectionString(cfg Config) string {
@@ -48,9 +51,8 @@ func buildConnectionString(cfg Config) string {
 }
 
 // CreateDB creates a new connection pool with the database and applies the database schema.
-// The Postgres configurations can be found at configs/api/pg_hba.conf and configs/api/postgresql.conf.
+// The Postgres configurations can be found at docker-compose.yml in postgres container
 func CreateDB(cfg Config) (*sqlx.DB, error) {
-	fmt.Println(cfg)
 	const maxAttempts = 6
 	var (
 		db  *sqlx.DB

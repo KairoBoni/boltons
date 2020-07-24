@@ -32,7 +32,7 @@ func (s *Server) setupRoutes() {
 	s.route.Use(middleware.Logger())
 	s.route.Use(middleware.Recover())
 
-	s.route.GET("/nfe/total/:accessKey", s.handlers.getNfeTotal)
+	s.route.GET("/nfe/amount/:accessKey", s.handlers.getNfeAmount)
 }
 
 func (s *Server) Run() error {

@@ -12,14 +12,14 @@ var (
 	correctFormat = []byte(`
 	{
 		"access_key": "haha1212",
-		"total": "120 dols"
+		"amount": "120 dols"
 	}
 	`)
 
 	badFormat = []byte(`
 	{
 		"access_key: "haha1212",
-		"total": "120 dols"
+		"amount": "120 dols"
 	}
 	`)
 )
@@ -29,7 +29,7 @@ func TestMessageSender(t *testing.T) {
 	tests := []struct {
 		subscriber  kafka.SubscriberMock
 		accessKey   string
-		total       string
+		amount      string
 		expectedErr error
 	}{
 		{
@@ -38,7 +38,7 @@ func TestMessageSender(t *testing.T) {
 				Err:     nil,
 			},
 			accessKey:   "haha1212",
-			total:       "120 dols",
+			amount:      "120 dols",
 			expectedErr: nil,
 		},
 		{
@@ -47,7 +47,7 @@ func TestMessageSender(t *testing.T) {
 				Err:     nil,
 			},
 			accessKey:   "",
-			total:       "",
+			amount:      "",
 			expectedErr: fmt.Errorf("invalid character 'h' after object key"),
 		},
 		{
@@ -56,16 +56,16 @@ func TestMessageSender(t *testing.T) {
 				Err:     fmt.Errorf("failed to read subscriped topic"),
 			},
 			accessKey:   "",
-			total:       "",
+			amount:      "",
 			expectedErr: fmt.Errorf("failed to read subscriped topic"),
 		},
 	}
 
 	for _, test := range tests {
-		accessKey, total, err := reciveMessage(&test.subscriber)
+		accessKey, amount, err := reciveMessage(&test.subscriber)
 
 		assert.Equal(t, test.accessKey, accessKey)
-		assert.Equal(t, test.total, total)
+		assert.Equal(t, test.amount, amount)
 		if err != nil {
 			assert.Equal(t, test.expectedErr.Error(), err.Error())
 		}

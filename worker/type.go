@@ -7,17 +7,12 @@ type Message struct {
 	XML       string `json:"xml"`
 }
 
-type TotalNFE struct {
-	AccessKey string
-	Total     string
-}
-
 type NFEProc struct {
 	XMLName xml.Name `xml:"nfeProc"`
-	Total   string   `xml:"NFe>infNFe>total>ICMSTot>vNF"`
+	Amount  string   `xml:"NFe>infNFe>amount>ICMSTot>vNF"`
 }
 
 type NFE struct {
 	XMLName xml.Name `xml:"NFe"`
-	Total   string   `xml:"infNFe>total>ICMSTot>vNF"`
+	Amount  string   `xml:"infNFe>amount>ICMSTot>vNF"`
 }

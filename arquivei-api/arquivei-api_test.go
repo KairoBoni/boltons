@@ -72,7 +72,6 @@ func (v *MockArquiveiClient) Do(req *http.Request) (*http.Response, error) {
 }
 
 func TestRequestNFEs(t *testing.T) {
-
 	tests := []struct {
 		page        Page
 		mock        MockArquiveiClient
@@ -208,7 +207,6 @@ func TestRequestNFEs(t *testing.T) {
 }
 
 func TestMessageSender(t *testing.T) {
-
 	tests := []struct {
 		message     kafka.WorkerMessage
 		publisher   kafka.PublishMock

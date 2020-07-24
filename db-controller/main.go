@@ -32,12 +32,12 @@ func main() {
 	}
 
 	for {
-		accessKey, total, err := reciveMessage(s)
+		accessKey, amount, err := reciveMessage(s)
 		if err != nil {
 			log.Error().Msgf("error while receiving message: %s", err.Error())
 		}
 
-		if err := store.InsertNfeTotal(accessKey, total); err != nil {
+		if err := store.InsertNfeAmount(accessKey, amount); err != nil {
 			log.Error().Msgf("error while save database: %s", err.Error())
 		}
 	}
@@ -55,6 +55,6 @@ func reciveMessage(s kafka.SubscriberInterface) (string, string, error) {
 		return "", "", err
 	}
 
-	return NFE.AccessKey, NFE.Total, nil
+	return NFE.AccessKey, NFE.Amount, nil
 
 }

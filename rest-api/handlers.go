@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/KairoBoni/boltons/pkg/database"
@@ -8,16 +9,19 @@ import (
 )
 
 type Handler struct {
-	db *database.Store
+	db database.StoreInterface
 }
 
-func (h *Handler) getNfeTotal(c echo.Context) error {
+func (h *Handler) getNfeAmount(c echo.Context) error {
 	accessKey := c.Param("accessKey")
 
-	total, err := h.db.GetNfeTotal(accessKey)
+	amount, err := h.db.GetNfeAmount(accessKey)
+	if amount == "" {
+		return c.JSON(http.StatusNotFound, fmt.Sprintf("No nfe found from the access key %s", accessKey))
+	}
 	if err != nil {
-		return c.JSON(http.StatusNotFound, err.Error())
+		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, total)
+	return c.JSON(http.StatusOK, amount)
 }
