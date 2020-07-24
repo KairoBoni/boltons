@@ -2,4 +2,4 @@ host: postgres
 port: 5432
 username: postgres
 password: haha1212
-name: boltons
+name: postgres

@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"flag"
+	"fmt"
 	"os"
+	"time"
 
 	"github.com/KairoBoni/boltons/pkg/kafka"
 	"github.com/rs/zerolog/log"
@@ -17,11 +19,21 @@ func main() {
 		kafkaBrokerURLs     = os.Getenv("KAFKA_BROKERS")
 		kafkaClientID       = os.Getenv("KAFKA_CLIENT_ID")
 		kafkaTopic          = os.Getenv("KAFKA_TOPIC")
+		messageChan         = make(chan kafka.WorkerMessage)
+		errChan             = make(chan error)
+		doneChan            = make(chan bool)
+		numWorkes           = 3
 	)
+	defer close(messageChan)
+	defer close(errChan)
+	defer close(doneChan)
 
 	if kafkaBrokerURLs == "" || kafkaTopic == "" || kafkaClientID == "" || arquiveiCredentials == "" {
-		log.Fatal().Msgf("Missing env variables")
+		log.Fatal().Msgf("Missing some environment variable (CREDENTIALS_FILEPATH|KAFKA_BROKERS|KAFKA_CLIENT_ID|KAFKA_TOPIC)")
 	}
+
+	//Wait for a while until the Kafka and Postgres start
+	time.Sleep(time.Second * 30)
 
 	cli, err := NewArquiveiClient(arquiveiCredentials)
 	if err != nil {
@@ -31,26 +43,53 @@ func main() {
 	p := kafka.NewPublisherOnTopic(kafkaBrokerURLs, kafkaClientID, kafkaTopic)
 	defer p.Close()
 
-	for {
-		NFCs, err := cli.RequestNFCs()
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to request NFC")
-		}
-		if len(NFCs) < 1 {
-			break
-		}
-		for _, nfc := range NFCs {
-			message, err := json.Marshal(&nfc)
-			if err != nil {
-				log.Fatal().Err(err).Msg("Failed to umarshal")
-			}
-			err = p.Publish(context.Background(), nil, message)
-			if err != nil {
-				log.Fatal().Err(err).Msg("Failed to publisher")
-			}
-		}
+	for i := 0; i < numWorkes; i++ {
+		go messageSender(messageChan, p, errChan)
 	}
 
-	log.Print("All NFCs are processed")
+	go func() {
+		for {
+			NFEs, err := cli.RequestNFEs()
+			if err != nil {
+				errChan <- fmt.Errorf("Failed to request NFE: %v", err)
+			}
+			if len(NFEs) < 1 {
+				doneChan <- true
+			}
+			for _, workerMessage := range NFEs {
+				messageChan <- workerMessage
+			}
+		}
+	}()
 
+	for {
+		select {
+		case err := <-errChan:
+			log.Fatal().Err(err).Msgf("Failed to send message to worker")
+
+		case <-doneChan:
+			log.Info().Msg("All NFEs were successfully collected")
+			return
+
+		}
+	}
+}
+
+func messageSender(messageChan chan kafka.WorkerMessage, p kafka.PublisherInterface, errChan chan error) {
+	for {
+		m, ok := (<-messageChan)
+		if !ok {
+			return
+		}
+
+		message, err := json.Marshal(m)
+		if err != nil {
+			errChan <- fmt.Errorf("Failed to marshal message: %v", err)
+		}
+
+		err = p.Publish(context.Background(), nil, message)
+		if err != nil {
+			errChan <- fmt.Errorf("Failed to publish mensssage: %v", err)
+		}
+	}
 }

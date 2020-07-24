@@ -5,8 +5,10 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"encoding/xml"
+	"fmt"
 	"os"
 	"regexp"
+	"time"
 
 	"github.com/KairoBoni/boltons/pkg/kafka"
 	"github.com/namsral/flag"
@@ -27,12 +29,16 @@ func main() {
 		log.Error().Msgf("Missing env variables")
 	}
 
+	time.Sleep(time.Second * 30)
+
 	s := kafka.NewTopicSubscription(kafkaBrokerURLs, kafkaClientID, kafkaSubscribeTopic)
 	p := kafka.NewPublisherOnTopic(kafkaBrokerURLs, kafkaClientID, kafkaPublisherTopic)
 
 	defer s.Close()
 	for {
+		fmt.Println("waitng message")
 		m, err := s.Read()
+		fmt.Println("recived")
 		if err != nil {
 			log.Error().Msgf("error while receiving message: %s", err.Error())
 		}

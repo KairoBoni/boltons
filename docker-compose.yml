@@ -1,0 +1,223 @@
+ 
+version: '3'
+services:
+  zk1:
+    image: confluentinc/cp-zookeeper:5.0.0
+    container_name: zk1
+    logging:
+      driver: none
+    ports: 
+      - "22181:22181"
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: 22181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+      ZOOKEEPER_SERVERS: zk1:22888:23888;zk2:32888:33888;zk3:42888:43888
+
+
+  zk2:
+    image: confluentinc/cp-zookeeper:5.0.0
+    container_name: zk2
+    logging:
+      driver: none
+    ports:
+      - "32181:32181"
+    environment:
+      ZOOKEEPER_SERVER_ID: 2
+      ZOOKEEPER_CLIENT_PORT: 32181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+      ZOOKEEPER_SERVERS: zk1:22888:23888;zk2:32888:33888;zk3:42888:43888
+
+
+  zk3:
+    image: confluentinc/cp-zookeeper:5.0.0
+    container_name: zk3
+    logging:
+      driver: none
+    ports: 
+      - "42181:42181"
+    environment:
+      ZOOKEEPER_SERVER_ID: 3
+      ZOOKEEPER_CLIENT_PORT: 42181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+      ZOOKEEPER_SERVERS: zk1:22888:23888;zk2:32888:33888;zk3:42888:43888
+
+
+  kafka1:
+    image: confluentinc/cp-kafka:5.0.0
+    container_name: kafka1
+    ports:
+      - "19092:19092"
+    depends_on:
+      - zk1
+      - zk2
+      - zk3
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: ${MY_IP}:22181,${MY_IP}:32181,${MY_IP}:42181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://${MY_IP}:19092
+    logging:
+      driver: none
+  kafka2:
+    image: confluentinc/cp-kafka:5.0.0
+    container_name: kafka2
+    ports:
+      - "29092:29092"
+    depends_on:
+      - zk1
+      - zk2
+      - zk3
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: ${MY_IP}:22181,${MY_IP}:32181,${MY_IP}:42181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://${MY_IP}:29092
+    logging:
+      driver: none
+
+
+  kafka3:
+    image: confluentinc/cp-kafka:5.0.0
+    container_name: kafka3
+    ports: 
+      - "39092:39092"
+    depends_on:
+      - zk1
+      - zk2
+      - zk3
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_ZOOKEEPER_CONNECT: ${MY_IP}:22181,${MY_IP}:32181,${MY_IP}:42181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://${MY_IP}:39092
+    logging:
+      driver: none
+
+  # This "container" is a workaround to pre-create topics
+  kafka-setup:
+    image: confluentinc/cp-kafka:5.0.0
+    hostname: kafka-setup
+    container_name: kafka-setup
+    depends_on:
+      - kafka3
+      - kafka2
+      - kafka1
+    command: "bash -c 'echo Waiting for Kafka to be ready... && \
+                       cub kafka-ready -b  kafka1:19092 1 20 && \
+                       kafka-topics --create --topic worker --partitions 2 --replication-factor 3 --if-not-exists --zookeeper zk1:22181 &&\
+                       kafka-topics --create --topic db --partitions 2 --replication-factor 3 --if-not-exists --zookeeper zk1:22181
+
+              '"
+    environment:
+      # The following settings are listed here only to satisfy the image's requirements.
+      # We override the image's `command` anyways, hence this container will not start a broker.
+      KAFKA_BROKER_ID: ignored
+      KAFKA_ZOOKEEPER_CONNECT: ignored
+    # logging:
+    #   driver: none
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: "haha1212"
+    container_name: postgres
+    ports:
+      - "15432:5432"
+    volumes:
+      - /home/
+    networks:
+      - postgres-network
+    logging:
+      driver: none
+      
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "haha1212"
+      PGADMIN_DEFAULT_PASSWORD: "haha1212"
+    container_name: pgadmin
+    ports:
+      - "16543:80"
+    depends_on:
+      - postgres
+    networks:
+      - postgres-network
+    logging:
+      driver: none
+  
+  rest-api:
+    build:
+      context: .
+      dockerfile: docker/rest-api.dockerfile
+    container_name: rest-api
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - kafka1
+      - kafka2
+    environment:
+      CONFIG_DB_FILEPATH: '../db-config.yaml'
+    networks:
+      - postgres-network
+  
+  db-controller:
+    build:
+      context: .
+      dockerfile: docker/db-controller.dockerfile
+    container_name: db-controller
+    depends_on:
+      - rest-api
+    environment:
+      CONFIG_DB_FILEPATH: '../db-config.yaml'
+      KAFKA_BROKERS: '${MY_IP}:19092,${MY_IP}:29092,${MY_IP}:39092'
+      KAFKA_CLIENT_ID: 'my-client'
+      KAFKA_TOPIC: 'db'
+    networks:
+      - postgres-network
+
+  arquivei-api:
+    build:
+      context: .
+      dockerfile: docker/arquivei-api.dockerfile
+    container_name: arquivei-api
+    depends_on:
+      - db-controller
+    environment:
+      CREDENTIALS_FILEPATH: 'credentials.yaml'
+      KAFKA_BROKERS: '${MY_IP}:19092,${MY_IP}:29092,${MY_IP}:39092'
+      KAFKA_CLIENT_ID: 'my-client'
+      KAFKA_TOPIC: 'worker'
+
+  worker1:
+    build:
+      context: .
+      dockerfile: docker/worker.dockerfile
+    container_name: worker1
+    depends_on:
+      - db-controller
+    environment:
+      KAFKA_BROKERS: '${MY_IP}:19092,${MY_IP}:29092,${MY_IP}:39092'
+      KAFKA_CLIENT_ID: 'my-client'
+      KAFKA_PUBLISHER_TOPIC: 'db'
+      KAFKA_SUBSCRIBE_TOPIC: 'worker'
+
+  worker2:
+    build:
+      context: .
+      dockerfile: docker/worker.dockerfile
+    container_name: worker2
+    depends_on:
+      - db-controller
+    environment:
+      KAFKA_BROKERS: '${MY_IP}:19092,${MY_IP}:29092,${MY_IP}:39092'
+      KAFKA_CLIENT_ID: 'my-client'
+      KAFKA_PUBLISHER_TOPIC: 'db'
+      KAFKA_SUBSCRIBE_TOPIC: 'worker'
+
+networks: 
+  postgres-network:
+    driver: bridge

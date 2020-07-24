@@ -16,7 +16,7 @@ func (h *Handler) getNfeTotal(c echo.Context) error {
 
 	total, err := h.db.GetNfeTotal(accessKey)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, "AccessKey not found")
+		return c.JSON(http.StatusNotFound, err.Error())
 	}
 
 	return c.JSON(http.StatusOK, total)

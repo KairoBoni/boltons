@@ -5,5 +5,5 @@ const (
 	VALUES ($1, $2)`
 
 	getNFETotal = `SELECT total FROM nfe_total
-	WHERE access_total=$1`
+	WHERE access_key=$1`
 )

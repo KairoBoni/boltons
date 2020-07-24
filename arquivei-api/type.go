@@ -1,13 +1,10 @@
 package main
 
-type BodyResponse struct {
-	NFCs []NFC `json:"data"`
-	Page Page  `json:"page"`
-}
+import "github.com/KairoBoni/boltons/pkg/kafka"
 
-type NFC struct {
-	AccessKey string `json:"access_key"`
-	XML       string `json:"xml"`
+type BodyResponse struct {
+	NFCs []kafka.WorkerMessage `json:"data"`
+	Page Page                  `json:"page"`
 }
 
 type Page struct {

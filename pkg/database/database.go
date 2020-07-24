@@ -24,12 +24,16 @@ func genSchema() string {
 	dbTimezone := `SET TIMEZONE TO 'America/Sao_Paulo';`
 
 	nfeTotalTable := `
-	CREATE TABLE IF NOT EXISTS nfe_total (
-	access_key TEXT PRIMARY KEY,
-	total TEXT NOT NULL
-);`
+		CREATE TABLE IF NOT EXISTS nfe_total (
+		access_key TEXT PRIMARY KEY,
+		total TEXT NOT NULL
+	);`
 
-	return dbTimezone + nfeTotalTable
+	deletePersistentData := `
+		DELETE FROM nfe_total;
+	`
+
+	return dbTimezone + nfeTotalTable + deletePersistentData
 }
 
 func buildConnectionString(cfg Config) string {
