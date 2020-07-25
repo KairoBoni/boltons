@@ -27,6 +27,8 @@ func main() {
 	//Wait for a while until the Kafka and Postgres start
 	time.Sleep(time.Second * 30)
 
+	log.Info().Msg("PGAdmin4 starts on server localhost:16543")
+
 	s := kafka.NewTopicSubscription(kafkaBrokerURLs, kafkaClientID, kafkaTopic)
 	defer s.Close()
 

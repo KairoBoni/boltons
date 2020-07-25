@@ -4,6 +4,7 @@ import (
 	"github.com/KairoBoni/boltons/pkg/database"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/rs/zerolog/log"
 )
 
 type Server struct {
@@ -30,7 +31,6 @@ func NewServer(dbConfigFilepath string) (*Server, error) {
 }
 
 func (s *Server) setupRoutes() {
-	s.route.Use(middleware.Logger())
 	s.route.Use(middleware.Recover())
 
 	s.route.GET("/nfe/amount/:accessKey", s.handlers.getNfeAmount)
@@ -38,5 +38,7 @@ func (s *Server) setupRoutes() {
 
 //Run starts the server
 func (s *Server) Run() error {
-	return s.route.Start(":8080")
+	s.route.HideBanner = true
+	log.Info().Msg("Server start on localhost:5002/")
+	return s.route.Start(":5002")
 }

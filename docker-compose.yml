@@ -159,7 +159,7 @@ services:
       dockerfile: docker/rest-api.dockerfile
     container_name: rest-api
     ports:
-      - "8080:8080"
+      - "5002:5002"
     depends_on:
       - postgres
       - kafka1
