@@ -49,9 +49,9 @@ services:
       ZOOKEEPER_SERVERS: zk1:22888:23888;zk2:32888:33888;zk3:42888:43888
 
 
-  kafka1:
+  broker1:
     image: confluentinc/cp-kafka:5.0.0
-    container_name: kafka1
+    container_name: broker1
     ports:
       - "19092:19092"
     depends_on:
@@ -60,13 +60,15 @@ services:
       - zk3
     environment:
       KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: ${MY_IP}:22181,${MY_IP}:32181,${MY_IP}:42181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://${MY_IP}:19092
+      KAFKA_ZOOKEEPER_CONNECT: ${DOCKER_HOST_IP}:22181,${DOCKER_HOST_IP}:32181,${DOCKER_HOST_IP}:42181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://${DOCKER_HOST_IP}:19092
     logging:
       driver: none
-  kafka2:
+
+
+  broker2:
     image: confluentinc/cp-kafka:5.0.0
-    container_name: kafka2
+    container_name: broker2
     ports:
       - "29092:29092"
     depends_on:
@@ -75,15 +77,15 @@ services:
       - zk3
     environment:
       KAFKA_BROKER_ID: 2
-      KAFKA_ZOOKEEPER_CONNECT: ${MY_IP}:22181,${MY_IP}:32181,${MY_IP}:42181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://${MY_IP}:29092
+      KAFKA_ZOOKEEPER_CONNECT: ${DOCKER_HOST_IP}:22181,${DOCKER_HOST_IP}:32181,${DOCKER_HOST_IP}:42181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://${DOCKER_HOST_IP}:29092
     logging:
       driver: none
 
 
-  kafka3:
+  broker3:
     image: confluentinc/cp-kafka:5.0.0
-    container_name: kafka3
+    container_name: broker3
     ports: 
       - "39092:39092"
     depends_on:
@@ -92,8 +94,8 @@ services:
       - zk3
     environment:
       KAFKA_BROKER_ID: 3
-      KAFKA_ZOOKEEPER_CONNECT: ${MY_IP}:22181,${MY_IP}:32181,${MY_IP}:42181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://${MY_IP}:39092
+      KAFKA_ZOOKEEPER_CONNECT: ${DOCKER_HOST_IP}:22181,${DOCKER_HOST_IP}:32181,${DOCKER_HOST_IP}:42181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://${DOCKER_HOST_IP}:39092
     logging:
       driver: none
 
@@ -104,11 +106,11 @@ services:
     hostname: kafka-setup
     container_name: kafka-setup
     depends_on:
-      - kafka3
-      - kafka2
-      - kafka1
+      - broker3
+      - broker2
+      - broker1
     command: "bash -c 'echo Waiting for Kafka to be ready... && \
-                       cub kafka-ready -b  kafka1:19092 1 20 && \
+                       cub kafka-ready -b  broker1:19092 1 20 && \
                        kafka-topics --create --topic worker --partitions 2 --replication-factor 3 --if-not-exists --zookeeper zk1:22181 &&\
                        kafka-topics --create --topic db --partitions 2 --replication-factor 3 --if-not-exists --zookeeper zk1:22181
 
@@ -162,8 +164,8 @@ services:
       - "5002:5002"
     depends_on:
       - postgres
-      - kafka1
-      - kafka2
+      - broker1
+      - broker2
     environment:
       CONFIG_DB_FILEPATH: '../db-config.yaml'
     networks:
@@ -179,7 +181,7 @@ services:
       - rest-api
     environment:
       CONFIG_DB_FILEPATH: '../db-config.yaml'
-      KAFKA_BROKERS: '${MY_IP}:19092,${MY_IP}:29092,${MY_IP}:39092'
+      KAFKA_BROKERS: '${DOCKER_HOST_IP}:19092,${DOCKER_HOST_IP}:29092,${DOCKER_HOST_IP}:39092'
       KAFKA_CLIENT_ID: 'my-client'
       KAFKA_TOPIC: 'db'
     networks:
@@ -195,7 +197,7 @@ services:
       - db-controller
     environment:
       CREDENTIALS_FILEPATH: 'credentials.yaml'
-      KAFKA_BROKERS: '${MY_IP}:19092,${MY_IP}:29092,${MY_IP}:39092'
+      KAFKA_BROKERS: '${DOCKER_HOST_IP}:19092,${DOCKER_HOST_IP}:29092,${DOCKER_HOST_IP}:39092'
       KAFKA_CLIENT_ID: 'my-client'
       KAFKA_TOPIC: 'worker'
 
@@ -208,7 +210,7 @@ services:
     depends_on:
       - db-controller
     environment:
-      KAFKA_BROKERS: '${MY_IP}:19092,${MY_IP}:29092,${MY_IP}:39092'
+      KAFKA_BROKERS: '${DOCKER_HOST_IP}:19092,${DOCKER_HOST_IP}:29092,${DOCKER_HOST_IP}:39092'
       KAFKA_CLIENT_ID: 'my-client'
       KAFKA_PUBLISHER_TOPIC: 'db'
       KAFKA_SUBSCRIBE_TOPIC: 'worker'
@@ -222,7 +224,7 @@ services:
     depends_on:
       - db-controller
     environment:
-      KAFKA_BROKERS: '${MY_IP}:19092,${MY_IP}:29092,${MY_IP}:39092'
+      KAFKA_BROKERS: '${DOCKER_HOST_IP}:19092,${DOCKER_HOST_IP}:29092,${DOCKER_HOST_IP}:39092'
       KAFKA_CLIENT_ID: 'my-client'
       KAFKA_PUBLISHER_TOPIC: 'db'
       KAFKA_SUBSCRIBE_TOPIC: 'worker'

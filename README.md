@@ -2,20 +2,22 @@
 
 This application aims to collect NFe data and extract its amounts, placing it in a database and providing a route for easy access via HTTP request.
 
+Observing the [NFe integration document](https://www.nfe.fazenda.gov.br/portal/exibirArquivo.aspx?conteudo=TIiR6jY8fsM=) provided by the Ministry of Finance, the field that corresponds to the amount in the XML is the id tag **W16**, which corresponds to the **vNF** field.
+
 This software is based on a **microservice architecture**.
 
 ## Technologies
 
-* [Golang - v1.13](https://golang.org/)
-* [Golang Echo Server - v4.1.16](https://github.com/labstack/echo)
-* [Docker - v18.09.5](https://www.docker.com/)
-* [Docker-Compose - v1.23.1](https://docs.docker.com/compose/)
-* [Apache Kafka - v5.0.0](https://kafka.apache.org/)
-* [Kafkacat - v1.6.0](https://github.com/edenhill/kafkacat)
-* [Confluentinc](https://www.confluent.io/)
-* [zookeeper - v5.0.0](https://docs.confluent.io/current/zookeeper/operations.html)
-* [PostgreSQL - v10.12](https://www.postgresql.org/)
-* [PGAdmin4](https://www.pgadmin.org/)
+* [Golang - v1.13]([https://golang.org/](https://golang.org/))
+* [Golang Echo Server - v4.1.16]([https://github.com/labstack/echo](https://github.com/labstack/echo))
+* [Docker - v18.09.5]([https://www.docker.com/](https://www.docker.com/))
+* [Docker-Compose - v1.23.1]([https://docs.docker.com/compose/](https://docs.docker.com/compose/))
+* [Apache Kafka - v5.0.0]([https://kafka.apache.org/](https://kafka.apache.org/))
+* [Kafkacat - v1.6.0]([https://github.com/edenhill/kafkacat](https://github.com/edenhill/kafkacat))
+* [Confluentinc]([https://www.confluent.io/](https://www.confluent.io/))
+* [zookeeper - v5.0.0]([https://docs.confluent.io/current/zookeeper/operations.html](https://docs.confluent.io/current/zookeeper/operations.html))
+* [PostgreSQL - v10.12]([https://www.postgresql.org/](https://www.postgresql.org/))
+* [PGAdmin4]([https://www.pgadmin.org/](https://www.pgadmin.org/))
 
 ## Architecture
 
@@ -47,14 +49,21 @@ This service only exposes the data collected by an **HTTP** request, talks direc
 
 ## Run
 
-To run the application you must first verify that [Docker](https://docs.docker.com/engine/install/ubuntu/) and [Docker-Compose](https://docs.docker.com/compose/install/) are installed on your pc. If not click on the links and install them.
+To run the application you must first verify that [Docker]([https://docs.docker.com/engine/install/ubuntu/](https://docs.docker.com/engine/install/ubuntu/)) and [Docker-Compose]([https://docs.docker.com/compose/install/](https://docs.docker.com/compose/install/)) are installed on your pc. If not click on the links and install them.
 
 After that, we insert the Arquivei API credentials in the arquivei-api/credentials.yaml file. In this way:
 ```yaml
 api-id: your api id here
 api-key: your api key here
 ```
-The next step is to collect the information from the network interface of the docker, for that we can use the ifconfig-a command, obtaining a result similar to this:
+And execute the command:
+```bash
+make run
+```
+
+:warning: If you have problems with Apache Kafka, due to the Docker IP Host, try to execute the code as follows:
+
+Collect the information from the network interface of the docker, for that we can use the `ifconfig -a` command, obtaining a result similar to this:
 
 ```bash
 docker0: flags=4099<UP,BROADCAST,MULTICAST>  mtu 1500
@@ -78,10 +87,10 @@ We look for the docker inet. In this case, our IP for the docker is **172.17.0.1
 
 Finally we can run our application using the command
 ```bash
-MY_IP=172.17.0.1 docker-compose up --build
+DOCKER_HOST_IP=172.17.0.1 docker-compose up --build
 ```
 
-:warning: Check if ports **5002** and **16543** are available, you need it to run our rest-api and pgadmin4 respectively.
+:warning: Check if ports **5002** and **16543** are available, you need it to run our rest-api and pgadmin4 respectively
 
 :warning: Maybe you need to **clean up the docker-compose** for the application to run as expected, for that you can run the command:
 ```bash
@@ -89,7 +98,7 @@ docker-compose down
 docker rm -f $(docker ps -a -q)
 docker volume rm $(docker volume ls -q)
 ```
-:warning: During the build of the codes in go, it can fail to get the library, and yes, they do not have a rety for that, if that happens, **clean the docker** compose and re run the application.
+:warning: During the build of the codes in go, it can fail to get the library, and yes, they do not have a rety for that, if that happens, **clean the docker compose** and re run the application
 
 
 ### Testing
@@ -104,3 +113,4 @@ Some examples of access keys:
 31140130290824000104550010000013671000013676
 41171130290824000104550010000544291448314562
 ```
+
