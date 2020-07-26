@@ -99,7 +99,7 @@ docker-compose down
 docker rm -f $(docker ps -a -q)
 docker volume rm $(docker volume ls -q)
 ```
-:warning: During the build of the codes in go, it can fail to get the library, and yes, they do not have a rety for that, if that happens, **clean the docker compose** and re run the application.
+:warning: During the build of the codes in go, it can fail to get the library, and yes, they do not have a retry for that, if that happens, **clean the docker compose** and re run the application.
 
 
 ### Testing
