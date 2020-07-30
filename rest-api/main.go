@@ -3,12 +3,16 @@ package main
 import (
 	"flag"
 	"os"
+	"time"
 
 	"github.com/rs/zerolog/log"
 )
 
 func main() {
 	flag.Parse()
+
+	//Wait for a while until the Kafka and Postgres start
+	time.Sleep(time.Second * 30)
 
 	dbConfigFilepath := os.Getenv("CONFIG_DB_FILEPATH")
 	if dbConfigFilepath == "" {
