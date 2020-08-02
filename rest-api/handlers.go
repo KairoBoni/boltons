@@ -25,5 +25,5 @@ func (h *Handler) getNfeAmount(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, fmt.Sprintf("No nfe found from the access key %s", accessKey))
 	}
 
-	return c.JSON(http.StatusOK, amount)
+	return c.JSON(http.StatusOK, fmt.Sprintf(`{"amount": "%s"}`, amount))
 }
