@@ -22,7 +22,7 @@ func TestGetNfeAmount(t *testing.T) {
 				Amount: "120 dol",
 				Err:    nil,
 			},
-			body:   "\"120 dol\"\n",
+			body:   "\"{\\\"amount\\\": \\\"120 dol\\\"}\"\n",
 			status: http.StatusOK,
 		},
 		{
